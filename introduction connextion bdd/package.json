@@ -1,0 +1,21 @@
+{
+  "name": "introduction-connection-bdd",
+  "version": "1.0.0",
+  "description": "Introduction à la connexion à une base de données PostgreSQL avec Node.js",
+  "main": "db_utils.js",
+  "scripts": {
+    "test": "node test_db_connection.js",
+    "test-env": "node test_env.js"
+  },
+  "keywords": [
+    "postgresql",
+    "node",
+    "database",
+    "connection"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "pg": "^8.11.3"
+  }
+}

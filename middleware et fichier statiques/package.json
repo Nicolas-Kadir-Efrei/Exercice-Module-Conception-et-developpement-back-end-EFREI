@@ -1,0 +1,13 @@
+{
+  "name": "express-middleware-demo",
+  "version": "1.0.0",
+  "description": "Démonstration des middlewares et fichiers statiques avec Express",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
