@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Manga - Interface de Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .section {
+            flex: 1;
+            min-width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+        input, select, textarea {
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #results {
+            white-space: pre-wrap;
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            min-height: 200px;
+        }
+        .manga-images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .manga-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            width: 150px;
+            text-align: center;
+        }
+        .manga-card img {
+            max-width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 3px;
+            margin-bottom: 8px;
+        }
+        .manga-card h3 {
+            font-size: 14px;
+            margin: 5px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+<body>
+    <h1>API Manga - Interface de Test</h1>
+    
+    <div class="container">
+        <div class="section">
+            <h2>Créer un Manga</h2>
+            <form id="createForm">
+                <label for="title">Titre:</label>
+                <input type="text" id="title" name="title" required>
+                
+                <label for="author">Auteur:</label>
+                <input type="text" id="author" name="author" required>
+                
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" rows="3" required></textarea>
+                
+                <label for="genre">Genres (séparés par des virgules):</label>
+                <input type="text" id="genre" name="genre" placeholder="action, aventure, comédie">
+                
+                <label for="volumes">Nombre de volumes:</label>
+                <input type="number" id="volumes" name="volumes" min="0">
+                
+                <label for="status">Statut:</label>
+                <select id="status" name="status">
+                    <option value="ongoing">En cours</option>
+                    <option value="completed">Terminé</option>
+                    <option value="hiatus">En pause</option>
+                </select>
+                
+                <label for="releaseYear">Année de sortie:</label>
+                <input type="number" id="releaseYear" name="releaseYear" required>
+                
+                <label for="rating">Note (0-10):</label>
+                <input type="number" id="rating" name="rating" min="0" max="10" step="0.1">
+                
+                <label for="coverImage">URL de l'image de couverture:</label>
+                <input type="text" id="coverImage" name="coverImage">
+                
+                <button type="submit">Créer</button>
+            </form>
+        </div>
+        
+        <div class="section">
+            <h2>Rechercher des Mangas</h2>
+            <form id="searchForm">
+                <label for="keyword">Mot-clé:</label>
+                <input type="text" id="keyword" name="keyword" required>
+                
+                <label for="searchGenre">Genre:</label>
+                <input type="text" id="searchGenre" name="genre">
+                
+                <label for="searchRating">Note minimale:</label>
+                <input type="number" id="searchRating" name="rating" min="0" max="10" step="0.1">
+                
+                <label for="searchStatus">Statut:</label>
+                <select id="searchStatus" name="status">
+                    <option value="">Tous</option>
+                    <option value="ongoing">En cours</option>
+                    <option value="completed">Terminé</option>
+                    <option value="hiatus">En pause</option>
+                </select>
+                
+                <button type="submit">Rechercher</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Obtenir un Manga par ID</h2>
+        <form id="getByIdForm">
+            <label for="mangaId">ID du Manga:</label>
+            <input type="text" id="mangaId" name="id" required>
+            <button type="submit">Obtenir</button>
+        </form>
+    </div>
+    
+    <div class="section">
+        <h2>Liste des Mangas</h2>
+        <form id="listForm">
+            <label for="page">Page:</label>
+            <input type="number" id="page" name="page" value="1" min="1">
+            
+            <label for="limit">Nombre par page:</label>
+            <input type="number" id="limit" name="limit" value="10" min="1">
+            
+            <button type="submit">Lister</button>
+        </form>
+    </div>
+    
+    <div class="section">
+        <h2>Résultats</h2>
+        <div id="manga-images" class="manga-images"></div>
+        <pre id="results">Les résultats s'afficheront ici...</pre>
+    </div>
+    
+    <script>
+        const API_URL = '/api/mangas';
+        const resultsElement = document.getElementById('results');
+        
+        const mangaImagesElement = document.getElementById('manga-images');
+        
+        // Fonction pour afficher les résultats
+        function displayResults(data) {
+            resultsElement.textContent = JSON.stringify(data, null, 2);
+            
+            // Vider le conteneur d'images
+            mangaImagesElement.innerHTML = '';
+            
+            // Vérifier si nous avons des données de manga à afficher
+            if (data && data.success) {
+                let mangas = [];
+                
+                // Déterminer où se trouvent les données de manga selon la structure de réponse
+                if (Array.isArray(data.data)) {
+                    mangas = data.data;
+                } else if (data.data && !Array.isArray(data.data)) {
+                    // Si c'est un seul manga
+                    mangas = [data.data];
+                }
+                
+                // Afficher les images pour chaque manga
+                mangas.forEach(manga => {
+                    if (manga && manga.coverImage) {
+                        const mangaCard = document.createElement('div');
+                        mangaCard.className = 'manga-card';
+                        
+                        // Créer l'élément image
+                        const img = document.createElement('img');
+                        img.src = manga.coverImage || 'https://via.placeholder.com/150x200?text=No+Image';
+                        img.alt = manga.title || 'Manga';
+                        img.onerror = function() {
+                            this.src = 'https://via.placeholder.com/150x200?text=Error+Loading';
+                        };
+                        
+                        // Créer le titre
+                        const title = document.createElement('h3');
+                        title.textContent = manga.title || 'Sans titre';
+                        
+                        // Ajouter les éléments à la carte
+                        mangaCard.appendChild(img);
+                        mangaCard.appendChild(title);
+                        
+                        // Ajouter la carte au conteneur
+                        mangaImagesElement.appendChild(mangaCard);
+                    }
+                });
+            }
+        }
+        
+        // Fonction pour gérer les erreurs
+        function handleError(error) {
+            resultsElement.textContent = `Erreur: ${error.message}`;
+            console.error('Erreur:', error);
+        }
+        
+        // Créer un manga
+        document.getElementById('createForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const mangaData = {
+                title: formData.get('title'),
+                author: formData.get('author'),
+                description: formData.get('description'),
+                genre: formData.get('genre').split(',').map(g => g.trim()).filter(g => g),
+                volumes: parseInt(formData.get('volumes')) || 0,
+                status: formData.get('status'),
+                releaseYear: parseInt(formData.get('releaseYear')),
+                rating: parseFloat(formData.get('rating')) || 0,
+                coverImage: formData.get('coverImage')
+            };
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(mangaData)
+                });
+                
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                handleError(error);
+            }
+        });
+        
+        // Rechercher des mangas
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const keyword = formData.get('keyword');
+            const genre = formData.get('genre');
+            const rating = formData.get('rating');
+            const status = formData.get('status');
+            
+            let queryParams = `keyword=${encodeURIComponent(keyword)}`;
+            if (genre) queryParams += `&genre=${encodeURIComponent(genre)}`;
+            if (rating) queryParams += `&rating=${encodeURIComponent(rating)}`;
+            if (status) queryParams += `&status=${encodeURIComponent(status)}`;
+            
+            try {
+                const response = await fetch(`${API_URL}/search?${queryParams}`);
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                handleError(error);
+            }
+        });
+        
+        // Obtenir un manga par ID
+        document.getElementById('getByIdForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('mangaId').value;
+            
+            try {
+                const response = await fetch(`${API_URL}/${id}`);
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                handleError(error);
+            }
+        });
+        
+        // Lister les mangas
+        document.getElementById('listForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const page = document.getElementById('page').value;
+            const limit = document.getElementById('limit').value;
+            
+            try {
+                const response = await fetch(`${API_URL}?page=${page}&limit=${limit}`);
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                handleError(error);
+            }
+        });
+    </script>
+</body>
+</html>
